@@ -1,13 +1,15 @@
 package main
 
 import (
-	"go_oauth/handler"
-
-	"github.com/labstack/echo/v4"
+	"fmt"
+	"go_oauth/registry"
+	"net/http"
 )
 
 func main() {
-	e := echo.New()
-	e.GET("/", handler.SignUp)
-	e.Logger.Fatal(e.Start(":8080"))
+	handler := registry.AuthRegistry()
+	http.HandleFunc("/signup", handler.SignUpHandler)
+	if err := http.ListenAndServe(":8080", nil); err != nil {
+		fmt.Println("Error starting the server:", err)
+	}
 }
