@@ -6,6 +6,8 @@ import (
 	"go_oauth/application"
 	"go_oauth/domain"
 	"go_oauth/domain/model"
+
+	"golang.org/x/crypto/bcrypt"
 )
 
 type auth struct {
@@ -61,7 +63,7 @@ func (a *auth) SignUp(ctx context.Context, username, email, password string) (*m
 	return &output, nil
 }
 
-func (a *auth) Login(ctx context.Context, email, password string) (*model.LoginOutput, error) {
+func (a *auth) Login(ctx context.Context, email, inputPassword string) (*model.LoginOutput, error) {
 	// DB検索
 	user, err := a.userRepository.FindUserByEmail(ctx, email)
 	if err != nil {
@@ -72,13 +74,14 @@ func (a *auth) Login(ctx context.Context, email, password string) (*model.LoginO
 		// TODO: エラー処理
 		return nil, errors.New("メールアドレスまたはパスワードが間違っています。")
 	}
-	hashedPassword, err := a.authService.HashPassowrd(ctx, password)
-	if err != nil {
-		return nil, err
-	}
-	if user.Password != hashedPassword {
+
+	// パスワードの検証
+	if err := a.authService.VerifyPassoword(ctx, user.Password, inputPassword); err == bcrypt.ErrMismatchedHashAndPassword {
 		// TODO: errorsに移す
 		return nil, errors.New("メールアドレスまたはパスワードが間違っています。")
+	} else if err != nil {
+		// InternalError
+		return nil, err
 	}
 	token, err := a.authService.CreateToken(ctx, user.ID)
 	if err != nil {
