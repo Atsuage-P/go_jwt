@@ -19,11 +19,11 @@ func NewAuthService() domain.AuthService {
 	return &authService{}
 }
 
-func (as *authService) VerifyPassoword(ctx context.Context, password, hashedPassword string) error {
+func (as *authService) VerifyPassword(ctx context.Context, password, hashedPassword string) error {
 	return bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
 }
 
-func (as *authService) HashPassowrd(ctx context.Context, password string) (string, error) {
+func (as *authService) HashPassword(ctx context.Context, password string) (string, error) {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	return string(hashedPassword), err
 }
