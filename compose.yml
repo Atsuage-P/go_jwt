@@ -13,6 +13,7 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    working_dir: /app
 
   db:
     image: mysql:8.0
