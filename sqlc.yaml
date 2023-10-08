@@ -1,0 +1,13 @@
+version: 2
+sql:
+  - engine: "mysql"
+    queries: "sqlc.sql"
+    schema: "./docker/db/init.d/01_create_table.sql"
+    gen:
+      go:
+        package: "sqlc"
+        sql_package: "database/sql"
+        sql_driver: "github.com/go-sql-driver/mysql"
+        out: "./infrastructure/sqlc"
+        emit_interface: true
+        emit_empty_slices: true
