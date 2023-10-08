@@ -29,15 +29,9 @@ func (ah *AuthHandler) SignUpHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	ctx := r.Context()
-	output, err := ah.authUsecase.SignUp(ctx, data.UserName, data.Email, data.Password)
+	res, err := ah.authUsecase.SignUp(ctx, data.UserName, data.Email, data.Password)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
-	}
-
-	res := struct {
-		Token string `json:"token"`
-	}{
-		Token: output.Token,
 	}
 
 	w.Header().Set("Content-Type", "application/json")

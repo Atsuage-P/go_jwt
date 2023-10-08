@@ -3,6 +3,7 @@ package usecase
 import (
 	"context"
 	"errors"
+	"fmt"
 	"go_oauth/application"
 	"go_oauth/domain"
 	"go_oauth/domain/model"
@@ -28,20 +29,20 @@ func NewAuthUsecase(
 
 func (a *auth) SignUp(ctx context.Context, username, email, password string) (*model.SignupOutput, error) {
 	// 同Emailのユーザーの検索
-	user, err := a.userRepository.FindUserByEmail(ctx, email)
+	exists, err := a.userRepository.ExistsUser(ctx, email)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("User Find Error: %v", err)
 	}
 	// ユーザーがいれば早期リターン
-	if user != nil {
+	if exists {
 		// TODO: errorsに移す
 		return nil, errors.New("このメールアドレスは既に登録されています。別のメールアドレスを使用してください。")
 	}
 
 	// パスワードを暗号化
-	hashedPassword, err := a.authService.HashPassowrd(ctx, password)
+	hashedPassword, err := a.authService.HashPassword(ctx, password)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("Password Hashed Error: %v", err)
 	}
 	signupInfo := model.SignupInput{
 		Username: username,
@@ -50,12 +51,13 @@ func (a *auth) SignUp(ctx context.Context, username, email, password string) (*m
 	}
 
 	// ユーザーのDB登録
-	if err := a.userRepository.CreateUser(ctx, signupInfo); err != nil {
-		return nil, err
-	}
-	token, err := a.authService.CreateToken(ctx, user.ID)
+	userID, err := a.userRepository.CreateUser(ctx, signupInfo)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("DB Error: %v", err)
+	}
+	token, err := a.authService.CreateToken(ctx, userID)
+	if err != nil {
+		return nil, fmt.Errorf("Create Token Error: %v", err)
 	}
 	output := model.SignupOutput{
 		Token: token,
@@ -76,7 +78,7 @@ func (a *auth) Login(ctx context.Context, email, inputPassword string) (*model.L
 	}
 
 	// パスワードの検証
-	if err := a.authService.VerifyPassoword(ctx, user.Password, inputPassword); err == bcrypt.ErrMismatchedHashAndPassword {
+	if err := a.authService.VerifyPassword(ctx, user.Password, inputPassword); err == bcrypt.ErrMismatchedHashAndPassword {
 		// TODO: errorsに移す
 		return nil, errors.New("メールアドレスまたはパスワードが間違っています。")
 	} else if err != nil {

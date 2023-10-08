@@ -4,17 +4,43 @@ import (
 	"context"
 	"go_oauth/domain"
 	"go_oauth/domain/model"
+	"go_oauth/infrastructure/sqlc"
 )
 
 type userRepository struct {
+	db *sqlc.Queries
 }
 
-func NewUserRepository() domain.UserRepository {
-	return &userRepository{}
+func NewUserRepository(db *sqlc.Queries) domain.UserRepository {
+	return &userRepository{
+		db: db,
+	}
 }
 
-func (r *userRepository) CreateUser(ctx context.Context, signupInfo model.SignupInput) error {
-	return nil
+func (r *userRepository) CreateUser(ctx context.Context, signupInfo model.SignupInput) (int64, error) {
+	args := sqlc.InsertUserParams{
+		UserName: signupInfo.Username,
+		Email: signupInfo.Email,
+		Password: signupInfo.Password,
+	}
+	result, err :=r.db.InsertUser(ctx, args)
+	if err != nil {
+		return 0, err
+	}
+	userID, err := result.LastInsertId()
+	if err != nil {
+		return 0, err
+	}
+
+	return userID, nil
+}
+
+func (r *userRepository) ExistsUser(ctx context.Context, email string) (bool, error) {
+	exists, err := r.db.ExistsUser(ctx, email)
+	if err != nil {
+		return false, err
+	}
+	return exists, nil
 }
 
 func (r *userRepository) FindUserByEmail(ctx context.Context, email string) (*model.User, error) {

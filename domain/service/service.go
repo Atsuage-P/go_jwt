@@ -29,7 +29,7 @@ func (as *authService) HashPassword(ctx context.Context, password string) (strin
 }
 
 // NOTE: golang-jwt(https://pkg.go.dev/github.com/golang-jwt/jwt/v5)
-func (as *authService) CreateToken(ctx context.Context, userID int) (string, error) {
+func (as *authService) CreateToken(ctx context.Context, userID int64) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"user_id": userID,
 		// TODO: 1を環境変数にする
