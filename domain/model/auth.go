@@ -18,3 +18,11 @@ type LoginInput struct {
 type LoginOutput struct {
 	Token string
 }
+
+type APIInput struct {
+	Token string
+}
+
+type APIOutput struct {
+	Message string
+}

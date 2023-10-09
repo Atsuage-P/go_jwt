@@ -72,9 +72,9 @@ func (a *auth) Login(ctx context.Context, email, inputPassword string) (*model.L
 		// TODO: エラー処理
 		return nil, err
 	}
-	if user != nil {
+	if user == nil {
 		// TODO: エラー処理
-		return nil, errors.New("メールアドレスまたはパスワードが間違っています。")
+		return nil, errors.New("ユーザーが見つかりません。")
 	}
 
 	// パスワードの検証
@@ -100,4 +100,15 @@ func (a *auth) Logout(ctx context.Context, token string) error {
 		return err
 	}
 	return nil
+}
+
+func (a *auth) Hello(ctx context.Context, token string) (*model.APIOutput, error) {
+	if err := a.authService.InvalidateToken(ctx, token); err != nil {
+		return nil, err
+	}
+	output := model.APIOutput{
+		Message: "success",
+	}
+
+	return &output, nil
 }

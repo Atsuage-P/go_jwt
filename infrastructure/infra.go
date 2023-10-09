@@ -2,6 +2,7 @@ package infrastructure
 
 import (
 	"context"
+	"fmt"
 	"go_oauth/domain"
 	"go_oauth/domain/model"
 	"go_oauth/infrastructure/sqlc"
@@ -20,10 +21,10 @@ func NewUserRepository(db *sqlc.Queries) domain.UserRepository {
 func (r *userRepository) CreateUser(ctx context.Context, signupInfo model.SignupInput) (int64, error) {
 	args := sqlc.InsertUserParams{
 		UserName: signupInfo.Username,
-		Email: signupInfo.Email,
+		Email:    signupInfo.Email,
 		Password: signupInfo.Password,
 	}
-	result, err :=r.db.InsertUser(ctx, args)
+	result, err := r.db.InsertUser(ctx, args)
 	if err != nil {
 		return 0, err
 	}
@@ -44,5 +45,13 @@ func (r *userRepository) ExistsUser(ctx context.Context, email string) (bool, er
 }
 
 func (r *userRepository) FindUserByEmail(ctx context.Context, email string) (*model.User, error) {
-	return nil, nil
+	result, err := r.db.GetUserByEmail(ctx, email)
+	if err != nil {
+		return nil, fmt.Errorf("DB Error: %v", err)
+	}
+	user := model.User{
+		ID:       int64(result.UserID),
+		Password: result.Password,
+	}
+	return &user, nil
 }

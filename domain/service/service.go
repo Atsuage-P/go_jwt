@@ -19,7 +19,7 @@ func NewAuthService() domain.AuthService {
 	return &authService{}
 }
 
-func (as *authService) VerifyPassword(ctx context.Context, password, hashedPassword string) error {
+func (as *authService) VerifyPassword(ctx context.Context, hashedPassword, password string) error {
 	return bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
 }
 

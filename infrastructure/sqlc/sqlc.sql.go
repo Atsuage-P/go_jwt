@@ -45,7 +45,7 @@ const getUserByEmail = `-- name: GetUserByEmail :one
 SELECT
   user_id,
   user_name,
-  email
+  password
 FROM
   user
 WHERE
@@ -55,13 +55,13 @@ WHERE
 type GetUserByEmailRow struct {
 	UserID   uint32
 	UserName string
-	Email    string
+	Password string
 }
 
 func (q *Queries) GetUserByEmail(ctx context.Context, email string) (GetUserByEmailRow, error) {
 	row := q.db.QueryRowContext(ctx, getUserByEmail, email)
 	var i GetUserByEmailRow
-	err := row.Scan(&i.UserID, &i.UserName, &i.Email)
+	err := row.Scan(&i.UserID, &i.UserName, &i.Password)
 	return i, err
 }
 
