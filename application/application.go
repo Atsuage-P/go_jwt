@@ -2,7 +2,7 @@ package application
 
 import (
 	"context"
-	"go_oauth/domain/model"
+	"go_jwt/domain/model"
 )
 
 type AuthUsecase interface {

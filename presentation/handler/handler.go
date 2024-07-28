@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"go_oauth/application"
+	"go_jwt/application"
 )
 
 type AuthHandler struct {

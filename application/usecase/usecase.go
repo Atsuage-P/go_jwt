@@ -4,9 +4,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"go_oauth/application"
-	"go_oauth/domain"
-	"go_oauth/domain/model"
+	"go_jwt/application"
+	"go_jwt/domain"
+	"go_jwt/domain/model"
 
 	"golang.org/x/crypto/bcrypt"
 )

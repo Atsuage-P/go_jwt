@@ -2,7 +2,7 @@ package domain
 
 import (
 	"context"
-	"go_oauth/domain/model"
+	"go_jwt/domain/model"
 )
 
 type UserRepository interface {

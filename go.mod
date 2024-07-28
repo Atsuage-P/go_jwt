@@ -1,4 +1,4 @@
-module go_oauth
+module go_jwt
 
 go 1.19
 

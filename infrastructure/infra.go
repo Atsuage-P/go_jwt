@@ -3,9 +3,9 @@ package infrastructure
 import (
 	"context"
 	"fmt"
-	"go_oauth/domain"
-	"go_oauth/domain/model"
-	"go_oauth/infrastructure/sqlc"
+	"go_jwt/domain"
+	"go_jwt/domain/model"
+	"go_jwt/infrastructure/sqlc"
 )
 
 type userRepository struct {

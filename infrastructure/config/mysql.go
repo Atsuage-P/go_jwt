@@ -5,7 +5,7 @@ import (
 	"log"
 	"time"
 
-	"go_oauth/env"
+	"go_jwt/env"
 
 	"github.com/go-sql-driver/mysql"
 )

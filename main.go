@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
-	"go_oauth/env"
-	"go_oauth/registry"
+	"go_jwt/env"
+	"go_jwt/registry"
 	"net/http"
 )
 

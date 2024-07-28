@@ -4,8 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"go_oauth/domain"
-	"go_oauth/internal/cert"
+	"go_jwt/domain"
+	"go_jwt/internal/cert"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
