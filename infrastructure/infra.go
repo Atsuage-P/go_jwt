@@ -20,7 +20,7 @@ func NewUserRepository(db *sqlc.Queries) domain.UserRepository {
 
 func (r *userRepository) CreateUser(ctx context.Context, signupInfo model.SignupInput) (int64, error) {
 	args := sqlc.InsertUserParams{
-		UserName: signupInfo.Username,
+		UserName: signupInfo.UserName,
 		Email:    signupInfo.Email,
 		Password: signupInfo.Password,
 	}
@@ -41,17 +41,19 @@ func (r *userRepository) ExistsUser(ctx context.Context, email string) (bool, er
 	if err != nil {
 		return false, err
 	}
+
 	return exists, nil
 }
 
 func (r *userRepository) FindUserByEmail(ctx context.Context, email string) (*model.User, error) {
 	result, err := r.db.GetUserByEmail(ctx, email)
 	if err != nil {
-		return nil, fmt.Errorf("DB Error: %v", err)
+		return nil, fmt.Errorf("DB Error: %w", err)
 	}
 	user := model.User{
 		ID:       int64(result.UserID),
 		Password: result.Password,
 	}
+
 	return &user, nil
 }

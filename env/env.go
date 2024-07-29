@@ -7,7 +7,7 @@ import (
 	"github.com/joho/godotenv"
 )
 
-type EnvConfig struct {
+type Config struct {
 	DB DBConfig `envPrefix:"DB_"`
 }
 
@@ -23,13 +23,14 @@ type DBConfig struct {
 	MaxOpenIdleConns int    `env:"MAX_IDLE_CONNS,notEmpty"`
 }
 
-func LoadEnv() *EnvConfig {
+func LoadEnv() *Config {
 	if err := godotenv.Load(); err != nil {
 		log.Fatalf("Load Env Error: %v", err)
 	}
-	cfg := EnvConfig{}
+	cfg := Config{}
 	if err := env.Parse(&cfg); err != nil {
 		log.Fatalf("Env Parse Error: %v", err)
 	}
+
 	return &cfg
 }

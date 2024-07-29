@@ -32,5 +32,6 @@ func ConnectDB(cnf *env.DBConfig) *sql.DB {
 	db.SetConnMaxLifetime(time.Duration(cnf.MaxLifeTimeMin))
 	db.SetMaxOpenConns(cnf.MaxOpenConns)
 	db.SetMaxIdleConns(cnf.MaxOpenIdleConns)
+
 	return db
 }

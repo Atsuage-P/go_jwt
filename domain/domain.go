@@ -12,8 +12,8 @@ type UserRepository interface {
 }
 
 type AuthService interface {
-	VerifyPassword(ctx context.Context, password, hashedPassword string) error
-	HashPassword(ctx context.Context, password string) (string, error)
-	CreateToken(ctx context.Context, userID int64) (string, error)
-	InvalidateToken(ctx context.Context, token string) error
+	VerifyPassword(password, hashedPassword string) error
+	HashPassword(password string) (string, error)
+	CreateToken(userID int64) (string, error)
+	InvalidateToken(token string) error
 }

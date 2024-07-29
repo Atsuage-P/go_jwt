@@ -1,28 +1,28 @@
 package model
 
 type SignupInput struct {
-	Username string
-	Email    string
-	Password string
+	UserName string `json:"user_name"`
+	Email    string `json:"email"`
+	Password string `json:"password"`
 }
 
 type SignupOutput struct {
-	Token string
+	Token string `json:"token"`
 }
 
 type LoginInput struct {
-	Email    string
-	Password string
+	Email    string `json:"email"`
+	Password string `json:"password"`
 }
 
 type LoginOutput struct {
-	Token string
+	Token string `json:"token"`
 }
 
 type APIInput struct {
-	Token string
+	Token string `json:"token"`
 }
 
 type APIOutput struct {
-	Message string
+	Message string `json:"message"`
 }

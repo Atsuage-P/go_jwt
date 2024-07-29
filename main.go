@@ -5,6 +5,7 @@ import (
 	"go_jwt/env"
 	"go_jwt/registry"
 	"net/http"
+	"time"
 )
 
 func main() {
@@ -14,7 +15,14 @@ func main() {
 	http.HandleFunc("/signup", handler.SignUpHandler)
 	http.HandleFunc("/login", handler.LoginHandler)
 	http.HandleFunc("/hello", handler.HelloHandler)
-	if err := http.ListenAndServe(":8080", nil); err != nil {
+
+	const ReadTime = 30
+	s := http.Server{
+		Addr:        ":8080",
+		ReadTimeout: ReadTime * time.Second,
+		Handler:     nil,
+	}
+	if err := s.ListenAndServe(); err != nil {
 		fmt.Println("Error starting the server:", err)
 	}
 }

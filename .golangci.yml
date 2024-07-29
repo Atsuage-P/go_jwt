@@ -1,0 +1,42 @@
+# https://golangci-lint.run/usage/linters/
+linters:
+  enable:
+    - bodyclose # httpレスポンスボディが閉じられていることのチェック
+    - contextcheck # 関数が継承されてないcontextを使っていればチェック
+    - cyclop    # 循環的複雑度チェック
+    - errorlint # errors.Isやerrors.Asでの比較をしているかチェック
+    - funlen    # 長い関数の検出
+    - gochecknoglobals # グローバル変数を許可しない
+    - gocognit  # 関数の認知的複雑度の検出
+    - goconst   # 定数に置き換え可能な繰り返し文字列を検出
+    - gocyclo   # 関数の循環的複雑度の検出
+    - gofmt     # gofmtされているかチェック
+    - goimports # importの順序を整理
+    - gosec     # ソースコード上にセキュリティ問題がないか検査
+    - lll       # 長い行の検出
+    - loggercheck # ロガーライブラリのキーバリューペアチェック
+    - misspell  # よくある英語のスペルミス検出
+    - musttag   # 構造体に(um)marshalするときにタグを強制する
+    - mnd       # マジックナンバーを検出
+    - nestif    # 深いifのネスト検出
+    - nilerr    # errがnilでないことをチェックしているのにnilを返している部分の検出
+    - nlreturn  # returnや分岐の前に改行があってコードが明確かチェック
+    - noctx     # httpリクエストをctxなしで送信している部分を検出
+    - nolintlint  # nolintが不正な形式や不十分な部分を報告
+    - prealloc  # スライスのキャパシティが事前確保できる場合に報告
+    - reassign  # パッケージ変数が再割り当てされていないことをチェック
+    - revive    # reviseによるリンター
+    - rowserrcheck  # RowsErrを正常にチェックしているか確認
+    - sloglint  # log/slogのコードスタイルの一貫性を保証する
+    - sqlclosecheck # sql.Rowsやsql.Stmtが閉じられていることのチェック
+    - tagliatelle # 構造体のタグのチェック
+    - unconvert # 不要な型変換の削除
+    - unparam   # 未使用の引数を検出
+    - wastedassign  # 不要な代入文を検出
+    - whitespace  # ifやforの先頭末尾に不要な改行がないかチェック
+linters-settings:
+  tagliatelle:
+    case:
+      use-field-name: true
+      rules:
+        json: snake

@@ -10,7 +10,7 @@ import (
 	"go_jwt/presentation/handler"
 )
 
-func AuthRegistry(cnf *env.EnvConfig) handler.AuthHandler {
+func AuthRegistry(cnf *env.Config) handler.AuthHandler {
 	db := config.ConnectDB(&cnf.DB)
 	queries := sqlc.New(db)
 
@@ -18,5 +18,6 @@ func AuthRegistry(cnf *env.EnvConfig) handler.AuthHandler {
 	authService := service.NewAuthService()
 	authUsecase := usecase.NewAuthUsecase(userRepository, authService)
 	authHandler := handler.NewAuthHandler(authUsecase)
+
 	return *authHandler
 }

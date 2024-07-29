@@ -61,8 +61,8 @@ func (ah *AuthHandler) LoginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (ah *AuthHandler) LogoutHandler(w http.ResponseWriter, r *http.Request) {
-}
+// func (ah *AuthHandler) LogoutHandler(w http.ResponseWriter, r *http.Request) {
+// }
 
 func (ah *AuthHandler) HelloHandler(w http.ResponseWriter, r *http.Request) {
 	var data struct {
@@ -72,8 +72,7 @@ func (ah *AuthHandler) HelloHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Invalid JSON", http.StatusBadRequest)
 	}
 
-	ctx := r.Context()
-	res, err := ah.authUsecase.Hello(ctx, data.Token)
+	res, err := ah.authUsecase.Hello(data.Token)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
