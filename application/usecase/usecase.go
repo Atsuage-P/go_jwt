@@ -7,6 +7,7 @@ import (
 	"go_jwt/application"
 	"go_jwt/domain"
 	"go_jwt/domain/model"
+	apperror "go_jwt/internal/errors"
 
 	"golang.org/x/crypto/bcrypt"
 )
@@ -35,8 +36,7 @@ func (a *auth) SignUp(ctx context.Context, username, email, password string) (*m
 	}
 	// ユーザーがいれば早期リターン
 	if exists {
-		// TODO: errorsに移す
-		return nil, errors.New("このメールアドレスは既に登録されています。別のメールアドレスを使用してください。")
+		return nil, apperror.ErrDuplicateID
 	}
 
 	// パスワードを暗号化
@@ -70,19 +70,14 @@ func (a *auth) Login(ctx context.Context, email, inputPassword string) (*model.L
 	// DB検索
 	user, err := a.userRepository.FindUserByEmail(ctx, email)
 	if err != nil {
-		// TODO: エラー処理
 		return nil, err
-	}
-	if user == nil {
-		// TODO: エラー処理
-		return nil, errors.New("ユーザーが見つかりません。")
 	}
 
 	// パスワードの検証
 	err = a.authService.VerifyPassword(user.Password, inputPassword)
 	if errors.Is(err, bcrypt.ErrMismatchedHashAndPassword) {
-		// TODO: errorsに移す
-		return nil, errors.New("メールアドレスまたはパスワードが間違っています。")
+		// bcryptError
+		return nil, apperror.ErrWrongLoginInfo
 	} else if err != nil {
 		// InternalError
 		return nil, err

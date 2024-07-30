@@ -2,10 +2,13 @@ package infrastructure
 
 import (
 	"context"
+	"database/sql"
+	"errors"
 	"fmt"
 	"go_jwt/domain"
 	"go_jwt/domain/model"
 	"go_jwt/infrastructure/sqlc"
+	apperror "go_jwt/internal/errors"
 )
 
 type userRepository struct {
@@ -48,6 +51,10 @@ func (r *userRepository) ExistsUser(ctx context.Context, email string) (bool, er
 func (r *userRepository) FindUserByEmail(ctx context.Context, email string) (*model.User, error) {
 	result, err := r.db.GetUserByEmail(ctx, email)
 	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, apperror.ErrNoUser
+		}
+
 		return nil, fmt.Errorf("DB Error: %w", err)
 	}
 	user := model.User{

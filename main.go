@@ -17,11 +17,13 @@ func main() {
 	http.HandleFunc("/hello", handler.HelloHandler)
 
 	const ReadTime = 30
+	const Port = "8080"
 	s := http.Server{
-		Addr:        ":8080",
+		Addr:        ":" + Port,
 		ReadTimeout: ReadTime * time.Second,
 		Handler:     nil,
 	}
+	fmt.Println("Starting server at port:", Port)
 	if err := s.ListenAndServe(); err != nil {
 		fmt.Println("Error starting the server:", err)
 	}
