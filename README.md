@@ -5,6 +5,9 @@
 - jwtを検証してAPIレスポンスを返す
 - DBとのやりとりがあるのでDockerを使う
 
+# 簡易アーキ図
+![](./doc/arch.png)
+
 ## 初回設定
 - `.env.local` をコピーして `.env` を作成
 ```
@@ -20,7 +23,7 @@ docker compose exec app bash
 go run main.go
 ```
 
-## 動作確認
+## API動作確認
 ```
 # サインアップ(ユーザー登録)
 curl -XPOST -H 'Content-Type: application/json' -d @signup.json localhost:8080/signup 
@@ -34,6 +37,15 @@ curl -XPOST -H 'Content-Type: application/json' -d '{"email": "sample2@mail.com"
 
 # jwt送信してリクエストの認証
 curl -XPOST -H 'Content-Type: application/json' -d '{"token": "<responseのtoken>"}' localhost:8080/hello
+```
+
+## テスト・リンター動作確認
+```
+# テスト
+make test
+
+# リンター
+make lint
 ```
 
 # メモ
