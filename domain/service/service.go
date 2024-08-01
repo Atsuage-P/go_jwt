@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"go_jwt/domain"
 	"go_jwt/internal/cert"
+	apperror "go_jwt/internal/errors"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -19,10 +20,17 @@ func NewAuthService() domain.AuthService {
 }
 
 func (as *authService) VerifyPassword(hashedPassword, password string) error {
+	if len(password) == 0 {
+		return apperror.ErrPasswordIsNone
+	}
+
 	return bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
 }
 
 func (as *authService) HashPassword(password string) (string, error) {
+	if len(password) == 0 {
+		return "", apperror.ErrPasswordIsNone
+	}
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 
 	return string(hashedPassword), err
