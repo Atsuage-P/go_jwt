@@ -530,3 +530,67 @@ func Test_auth_Hello(t *testing.T) {
 		})
 	}
 }
+
+func Test_auth_Logout(t *testing.T) {
+	type fields struct {
+		userRepository func(t *testing.T) domain.UserRepository
+		authService    func(t *testing.T) domain.AuthService
+	}
+	type args struct {
+		token string
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		wantErr bool
+	}{
+		{
+			name: "正常系",
+			fields: fields{
+				userRepository: func(*testing.T) domain.UserRepository {
+					return nil
+				},
+				authService: func(t *testing.T) domain.AuthService {
+					t.Helper()
+					ctrl := gomock.NewController(t)
+					m := mock.NewMockAuthService(ctrl)
+					m.EXPECT().InvalidateToken(gomock.Any()).Return(nil)
+
+					return m
+				},
+			},
+			args: args{
+				token: "token",
+			},
+		},
+		{
+			name: "異常系_無効なトークン",
+			fields: fields{
+				userRepository: func(*testing.T) domain.UserRepository {
+					return nil
+				},
+				authService: func(t *testing.T) domain.AuthService {
+					t.Helper()
+					ctrl := gomock.NewController(t)
+					m := mock.NewMockAuthService(ctrl)
+					m.EXPECT().InvalidateToken(gomock.Any()).Return(errors.New("error"))
+
+					return m
+				},
+			},
+			args: args{
+				token: "token",
+			},
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			a := usecase.NewAuthUsecase(tt.fields.userRepository(t), tt.fields.authService(t))
+			if err := a.Logout(tt.args.token); (err != nil) != tt.wantErr {
+				t.Errorf("auth.Logout() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
