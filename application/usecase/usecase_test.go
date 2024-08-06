@@ -1,3 +1,4 @@
+//nolint:funlen
 package usecase_test
 
 import (
@@ -11,6 +12,7 @@ import (
 	"testing"
 
 	"go.uber.org/mock/gomock"
+	"golang.org/x/crypto/bcrypt"
 )
 
 func Test_auth_SignUp(t *testing.T) {
@@ -24,6 +26,13 @@ func Test_auth_SignUp(t *testing.T) {
 		email    string
 		password string
 	}
+
+	signupInput := model.SignupInput{
+		UserName: "user1",
+		Email:    "test1@mail.com",
+		Password: "password",
+	}
+
 	tests := []struct {
 		name    string
 		fields  fields
@@ -45,11 +54,7 @@ func Test_auth_SignUp(t *testing.T) {
 
 					m.EXPECT().CreateUser(
 						gomock.Any(),
-						model.SignupInput{
-							UserName: "user1",
-							Email:    "test1@mail.com",
-							Password: "password",
-						},
+						signupInput,
 					).Return(int64(1), nil)
 
 					return m
@@ -59,7 +64,7 @@ func Test_auth_SignUp(t *testing.T) {
 					ctrl := gomock.NewController(t)
 					m := mock.NewMockAuthService(ctrl)
 					m.EXPECT().HashPassword(gomock.Any()).Return("password", nil)
-					m.EXPECT().CreateToken(int64(1)).Return("token1", nil)
+					m.EXPECT().CreateToken(gomock.Any()).Return("token1", nil)
 
 					return m
 				},
@@ -74,6 +79,167 @@ func Test_auth_SignUp(t *testing.T) {
 				Token: "token1",
 			},
 		},
+		{
+			name: "異常系_ユーザー検索でエラー",
+			fields: fields{
+				userRepository: func(t *testing.T) domain.UserRepository {
+					t.Helper()
+					ctrl := gomock.NewController(t)
+					m := mock.NewMockUserRepository(ctrl)
+					m.EXPECT().ExistsUser(
+						gomock.Any(),
+						gomock.Any(),
+					).Return(false, errors.New("error"))
+
+					return m
+				},
+				authService: func(*testing.T) domain.AuthService {
+					return nil
+				},
+			},
+			args: args{
+				ctx:      context.Background(),
+				username: "user1",
+				email:    "test1@mail.com",
+				password: "password",
+			},
+			want:    nil,
+			wantErr: true,
+		},
+		{
+			name: "異常系_ユーザー検索でユーザー重複エラー",
+			fields: fields{
+				userRepository: func(t *testing.T) domain.UserRepository {
+					t.Helper()
+					ctrl := gomock.NewController(t)
+					m := mock.NewMockUserRepository(ctrl)
+					m.EXPECT().ExistsUser(
+						gomock.Any(),
+						gomock.Any(),
+					).Return(true, nil)
+
+					return m
+				},
+				authService: func(*testing.T) domain.AuthService {
+					return nil
+				},
+			},
+			args: args{
+				ctx:      context.Background(),
+				username: "user1",
+				email:    "test1@mail.com",
+				password: "password",
+			},
+			want:    nil,
+			wantErr: true,
+		},
+		{
+			name: "異常系_パスワードハッシュ化エラー",
+			fields: fields{
+				userRepository: func(t *testing.T) domain.UserRepository {
+					t.Helper()
+					ctrl := gomock.NewController(t)
+					m := mock.NewMockUserRepository(ctrl)
+					m.EXPECT().ExistsUser(
+						gomock.Any(),
+						gomock.Any(),
+					).Return(false, nil)
+
+					return m
+				},
+				authService: func(t *testing.T) domain.AuthService {
+					t.Helper()
+					ctrl := gomock.NewController(t)
+					m := mock.NewMockAuthService(ctrl)
+					m.EXPECT().HashPassword(gomock.Any()).Return("", errors.New("error"))
+
+					return m
+				},
+			},
+			args: args{
+				ctx:      context.Background(),
+				username: "user1",
+				email:    "test1@mail.com",
+				password: "password",
+			},
+			want:    nil,
+			wantErr: true,
+		},
+		{
+			name: "異常系_ユーザー作成エラー",
+			fields: fields{
+				userRepository: func(t *testing.T) domain.UserRepository {
+					t.Helper()
+					ctrl := gomock.NewController(t)
+					m := mock.NewMockUserRepository(ctrl)
+					m.EXPECT().ExistsUser(
+						gomock.Any(),
+						gomock.Any(),
+					).Return(false, nil)
+
+					m.EXPECT().CreateUser(
+						gomock.Any(),
+						signupInput,
+					).Return(int64(1), errors.New("error"))
+
+					return m
+				},
+				authService: func(t *testing.T) domain.AuthService {
+					t.Helper()
+					ctrl := gomock.NewController(t)
+					m := mock.NewMockAuthService(ctrl)
+					m.EXPECT().HashPassword(gomock.Any()).Return("password", nil)
+
+					return m
+				},
+			},
+			args: args{
+				ctx:      context.Background(),
+				username: "user1",
+				email:    "test1@mail.com",
+				password: "password",
+			},
+			want:    nil,
+			wantErr: true,
+		},
+		{
+			name: "異常系_トークン生成エラー",
+			fields: fields{
+				userRepository: func(t *testing.T) domain.UserRepository {
+					t.Helper()
+					ctrl := gomock.NewController(t)
+					m := mock.NewMockUserRepository(ctrl)
+					m.EXPECT().ExistsUser(
+						gomock.Any(),
+						gomock.Any(),
+					).Return(false, nil)
+
+					m.EXPECT().CreateUser(
+						gomock.Any(),
+						signupInput,
+					).Return(int64(1), nil)
+
+					return m
+				},
+				authService: func(t *testing.T) domain.AuthService {
+					t.Helper()
+					ctrl := gomock.NewController(t)
+					m := mock.NewMockAuthService(ctrl)
+					m.EXPECT().HashPassword(gomock.Any()).Return("password", nil)
+					m.EXPECT().CreateToken(gomock.Any()).Return("", errors.New("error"))
+
+					return m
+				},
+			},
+			args: args{
+				ctx:      context.Background(),
+				username: "user1",
+				email:    "test1@mail.com",
+				password: "password",
+			},
+			want:    nil,
+			wantErr: true,
+		},
 	}
 	for _, tt := range tests {
 		tt := tt
@@ -83,6 +249,7 @@ func Test_auth_SignUp(t *testing.T) {
 			got, err := a.SignUp(tt.args.ctx, tt.args.username, tt.args.email, tt.args.password)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("auth.SignUp() error = %v, wantErr %v", err, tt.wantErr)
+
 				return
 			}
 			if !reflect.DeepEqual(got, tt.want) {
@@ -145,6 +312,135 @@ func Test_auth_Login(t *testing.T) {
 				Token: "token",
 			},
 		},
+		{
+			name: "異常系_メールによるユーザー検索でエラー",
+			fields: fields{
+				userRepository: func(t *testing.T) domain.UserRepository {
+					t.Helper()
+					ctrl := gomock.NewController(t)
+					m := mock.NewMockUserRepository(ctrl)
+					m.EXPECT().FindUserByEmail(
+						gomock.Any(),
+						gomock.Any(),
+					).Return(nil, errors.New("error"))
+
+					return m
+				},
+				authService: func(*testing.T) domain.AuthService {
+					return nil
+				},
+			},
+			args: args{
+				ctx:           context.Background(),
+				email:         "test1@mail.com",
+				inputPassword: "password",
+			},
+			want:    nil,
+			wantErr: true,
+		},
+		{
+			name: "異常系_パスワード検証で内部エラー",
+			fields: fields{
+				userRepository: func(t *testing.T) domain.UserRepository {
+					t.Helper()
+					ctrl := gomock.NewController(t)
+					m := mock.NewMockUserRepository(ctrl)
+					m.EXPECT().FindUserByEmail(
+						gomock.Any(),
+						gomock.Any(),
+					).Return(&model.User{}, nil)
+
+					return m
+				},
+				authService: func(*testing.T) domain.AuthService {
+					t.Helper()
+					ctrl := gomock.NewController(t)
+					m := mock.NewMockAuthService(ctrl)
+					m.EXPECT().VerifyPassword(
+						gomock.Any(),
+						gomock.Any(),
+					).Return(errors.New("error"))
+
+					return m
+				},
+			},
+			args: args{
+				ctx:           context.Background(),
+				email:         "test1@mail.com",
+				inputPassword: "password",
+			},
+			want:    nil,
+			wantErr: true,
+		},
+		{
+			name: "異常系_パスワード検証で不一致エラー",
+			fields: fields{
+				userRepository: func(t *testing.T) domain.UserRepository {
+					t.Helper()
+					ctrl := gomock.NewController(t)
+					m := mock.NewMockUserRepository(ctrl)
+					m.EXPECT().FindUserByEmail(
+						gomock.Any(),
+						gomock.Any(),
+					).Return(&model.User{}, nil)
+
+					return m
+				},
+				authService: func(*testing.T) domain.AuthService {
+					t.Helper()
+					ctrl := gomock.NewController(t)
+					m := mock.NewMockAuthService(ctrl)
+					m.EXPECT().VerifyPassword(
+						gomock.Any(),
+						gomock.Any(),
+					).Return(bcrypt.ErrMismatchedHashAndPassword)
+
+					return m
+				},
+			},
+			args: args{
+				ctx:           context.Background(),
+				email:         "test1@mail.com",
+				inputPassword: "password",
+			},
+			want:    nil,
+			wantErr: true,
+		},
+		{
+			name: "異常系_トークン生成でエラー",
+			fields: fields{
+				userRepository: func(t *testing.T) domain.UserRepository {
+					t.Helper()
+					ctrl := gomock.NewController(t)
+					m := mock.NewMockUserRepository(ctrl)
+					m.EXPECT().FindUserByEmail(
+						gomock.Any(),
+						gomock.Any(),
+					).Return(&model.User{}, nil)
+
+					return m
+				},
+				authService: func(t *testing.T) domain.AuthService {
+					t.Helper()
+					ctrl := gomock.NewController(t)
+					m := mock.NewMockAuthService(ctrl)
+					m.EXPECT().VerifyPassword(
+						gomock.Any(),
+						gomock.Any(),
+					).Return(nil)
+					m.EXPECT().CreateToken(gomock.Any()).Return("", errors.New("error"))
+
+					return m
+				},
+			},
+			args: args{
+				ctx:           context.Background(),
+				email:         "test1@mail.com",
+				inputPassword: "password",
+			},
+			want:    nil,
+			wantErr: true,
+		},
 	}
 	for _, tt := range tests {
 		tt := tt
@@ -154,6 +450,7 @@ func Test_auth_Login(t *testing.T) {
 			got, err := a.Login(tt.args.ctx, tt.args.email, tt.args.inputPassword)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("auth.Login() error = %v, wantErr %v", err, tt.wantErr)
+
 				return
 			}
 			if !reflect.DeepEqual(got, tt.want) {
@@ -224,6 +521,7 @@ func Test_auth_Hello(t *testing.T) {
 			got, err := a.Hello(tt.args.token)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("auth.Hello() error = %v, wantErr %v", err, tt.wantErr)
+
 				return
 			}
 			if !reflect.DeepEqual(got, tt.want) {
