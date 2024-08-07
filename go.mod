@@ -10,3 +10,5 @@ require (
 	go.uber.org/mock v0.4.0
 	golang.org/x/crypto v0.11.0
 )
+
+require github.com/DATA-DOG/go-sqlmock v1.5.2

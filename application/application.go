@@ -1,7 +1,5 @@
 package application
 
-//go:generate mockgen -source=$GOFILE -destination=../mock/mock_$GOFILE -package=mock
-
 import (
 	"context"
 	"go_jwt/domain/model"

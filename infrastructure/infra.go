@@ -1,5 +1,7 @@
 package infrastructure
 
+//go:generate mockgen -source=$GOFILE -destination=../mock/mock_$GOFILE -package=mock
+
 import (
 	"context"
 	"database/sql"
@@ -11,11 +13,19 @@ import (
 	apperror "go_jwt/internal/errors"
 )
 
-type userRepository struct {
-	db *sqlc.Queries
+// mockでテストするためにsqlcのQuerier interfaceをWrapする
+type Querier interface {
+	ExistsUser(ctx context.Context, email string) (bool, error)
+	GetLastInsertID(ctx context.Context) (int64, error)
+	GetUserByEmail(ctx context.Context, email string) (sqlc.GetUserByEmailRow, error)
+	InsertUser(ctx context.Context, arg sqlc.InsertUserParams) (sql.Result, error)
 }
 
-func NewUserRepository(db *sqlc.Queries) domain.UserRepository {
+type userRepository struct {
+	db Querier
+}
+
+func NewUserRepository(db sqlc.Querier) domain.UserRepository {
 	return &userRepository{
 		db: db,
 	}
