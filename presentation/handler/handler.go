@@ -21,6 +21,12 @@ func NewAuthHandler(authUsecase application.AuthUsecase) *AuthHandler {
 
 // TODO: 入力値のバリデーション
 func (ah *AuthHandler) SignUpHandler(w http.ResponseWriter, r *http.Request) {
+	defer func() {
+		if r := recover(); r != nil {
+			// TODO: ログ出力
+		}
+	}()
+
 	var data struct {
 		UserName string `json:"user_name"`
 		Email    string `json:"email"`
@@ -57,6 +63,12 @@ func (ah *AuthHandler) SignUpHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (ah *AuthHandler) LoginHandler(w http.ResponseWriter, r *http.Request) {
+	defer func() {
+		if r := recover(); r != nil {
+			// TODO: ログ出力
+		}
+	}()
+
 	var data struct {
 		Email    string `json:"email"`
 		Password string `json:"password"`
@@ -98,6 +110,12 @@ func (ah *AuthHandler) LoginHandler(w http.ResponseWriter, r *http.Request) {
 // }
 
 func (ah *AuthHandler) HelloHandler(w http.ResponseWriter, r *http.Request) {
+	defer func() {
+		if r := recover(); r != nil {
+			// TODO: ログ出力
+		}
+	}()
+
 	var data struct {
 		Token string `json:"token"`
 	}
