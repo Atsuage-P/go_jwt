@@ -102,6 +102,9 @@ func (a *auth) Logout(token string) error {
 }
 
 func (a *auth) Hello(token string) (*model.APIOutput, error) {
+	if token == "" {
+		return nil, apperror.ErrTokenIsNone
+	}
 	if err := a.authService.InvalidateToken(token); err != nil {
 		return nil, err
 	}

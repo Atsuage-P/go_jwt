@@ -14,6 +14,7 @@ var (
 	ErrDuplicateID    = errors.New("このメールアドレスは既に登録されています。別のメールアドレスを使用してください")
 	ErrWrongLoginInfo = errors.New("メールアドレスまたはパスワードが間違っています")
 	ErrPasswordIsNone = errors.New("パスワードが空です")
+	ErrTokenIsNone    = errors.New("トークンが空です")
 )
 
 func (a *AuthError) Error() string {

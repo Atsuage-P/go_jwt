@@ -11,4 +11,9 @@ require (
 	golang.org/x/crypto v0.11.0
 )
 
-require github.com/DATA-DOG/go-sqlmock v1.5.2
+require (
+	github.com/DATA-DOG/go-sqlmock v1.5.2
+	go.uber.org/zap v1.27.0
+)
+
+require go.uber.org/multierr v1.11.0 // indirect

@@ -512,6 +512,20 @@ func Test_auth_Hello(t *testing.T) {
 			want:    nil,
 			wantErr: true,
 		},
+		{
+			name: "異常系_Tokenが空",
+			fields: fields{
+				userRepository: func(*testing.T) domain.UserRepository {
+					return nil
+				},
+				authService: func(*testing.T) domain.AuthService {
+					return nil
+				},
+			},
+			args:    args{token: ""},
+			want:    nil,
+			wantErr: true,
+		},
 	}
 	for _, tt := range tests {
 		tt := tt

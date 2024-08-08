@@ -26,7 +26,7 @@ go run main.go
 ## API動作確認
 ```
 # サインアップ(ユーザー登録)
-curl -XPOST -H 'Content-Type: application/json' -d @signup.json localhost:8080/signup 
+curl -XPOST -H 'Content-Type: application/json' -d @signup.json localhost:8080/signup
   or
 curl -XPOST -H 'Content-Type: application/json' -d '{"user_name": "test1", "email": "sample2@mail.com", "password": "password"}' localhost:8080/signup
 

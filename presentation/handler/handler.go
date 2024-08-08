@@ -7,6 +7,9 @@ import (
 
 	"go_jwt/application"
 	apperror "go_jwt/internal/errors"
+	"go_jwt/internal/logger"
+
+	"go.uber.org/zap"
 )
 
 type AuthHandler struct {
@@ -19,11 +22,16 @@ func NewAuthHandler(authUsecase application.AuthUsecase) *AuthHandler {
 	}
 }
 
-// TODO: 入力値のバリデーション
 func (ah *AuthHandler) SignUpHandler(w http.ResponseWriter, r *http.Request) {
+	log := logger.NewLogger()
+	ctx := logger.WithContext(r.Context(), log)
+
 	defer func() {
 		if r := recover(); r != nil {
-			// TODO: ログ出力
+			log.Error("panic",
+				zap.Any("panic_msg", r),
+			)
+			http.Error(w, `{"message": "Internal Server Error"}`, http.StatusInternalServerError)
 		}
 	}()
 
@@ -42,15 +50,16 @@ func (ah *AuthHandler) SignUpHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ctx := r.Context()
 	res, err := ah.authUsecase.SignUp(ctx, data.UserName, data.Email, data.Password)
 	if err != nil {
 		if errors.Is(err, apperror.ErrDuplicateID) {
 			w.WriteHeader(http.StatusBadRequest)
 			http.Error(w, `{"message": "Bad Request"}`, http.StatusBadRequest)
+			log.Error(err.Error())
 		} else {
 			w.WriteHeader(http.StatusInternalServerError)
 			http.Error(w, `{"message": "Internal Server Error"}`, http.StatusInternalServerError)
+			log.Error(err.Error())
 		}
 
 		return
@@ -63,9 +72,15 @@ func (ah *AuthHandler) SignUpHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (ah *AuthHandler) LoginHandler(w http.ResponseWriter, r *http.Request) {
+	log := logger.NewLogger()
+	ctx := logger.WithContext(r.Context(), log)
+
 	defer func() {
 		if r := recover(); r != nil {
-			// TODO: ログ出力
+			log.Error("panic",
+				zap.Any("panic_msg", r),
+			)
+			http.Error(w, `{"message": "Internal Server Error"}`, http.StatusInternalServerError)
 		}
 	}()
 
@@ -79,11 +94,11 @@ func (ah *AuthHandler) LoginHandler(w http.ResponseWriter, r *http.Request) {
 	if err := json.NewDecoder(r.Body).Decode(&data); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		http.Error(w, `{"message": "Bad Request"}`, http.StatusBadRequest)
+		log.Error(err.Error())
 
 		return
 	}
 
-	ctx := r.Context()
 	res, err := ah.authUsecase.Login(ctx, data.Email, data.Password)
 	if err != nil {
 		if errors.Is(err, apperror.ErrWrongLoginInfo) {
@@ -96,6 +111,7 @@ func (ah *AuthHandler) LoginHandler(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusInternalServerError)
 			http.Error(w, `{"message": "Internal Server Error"}`, http.StatusInternalServerError)
 		}
+		log.Error(err.Error())
 
 		return
 	}
@@ -110,9 +126,14 @@ func (ah *AuthHandler) LoginHandler(w http.ResponseWriter, r *http.Request) {
 // }
 
 func (ah *AuthHandler) HelloHandler(w http.ResponseWriter, r *http.Request) {
+	log := logger.NewLogger()
+
 	defer func() {
 		if r := recover(); r != nil {
-			// TODO: ログ出力
+			log.Error("panic",
+				zap.Any("panic_msg", r),
+			)
+			http.Error(w, `{"message": "Internal Server Error"}`, http.StatusInternalServerError)
 		}
 	}()
 
@@ -121,13 +142,21 @@ func (ah *AuthHandler) HelloHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	if err := json.NewDecoder(r.Body).Decode(&data); err != nil {
 		http.Error(w, "Invalid JSON", http.StatusBadRequest)
+		log.Error(err.Error())
 
 		return
 	}
 
 	res, err := ah.authUsecase.Hello(data.Token)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		if errors.Is(err, apperror.ErrTokenIsNone) {
+			w.WriteHeader(http.StatusUnauthorized)
+			http.Error(w, `{"message": "Unauthorized"}`, http.StatusUnauthorized)
+		} else {
+			w.WriteHeader(http.StatusInternalServerError)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
+		log.Error(err.Error())
 
 		return
 	}
